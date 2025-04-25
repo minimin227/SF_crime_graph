@@ -6,3 +6,4 @@ gdown
 numpy
 folium
 streamlit-folium
+matplotlib
