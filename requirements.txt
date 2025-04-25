@@ -5,3 +5,4 @@ scikit-learn
 gdown
 numpy
 folium
+streamlit-folium
