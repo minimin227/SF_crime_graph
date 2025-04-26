@@ -7,3 +7,4 @@ numpy
 folium
 streamlit-folium
 matplotlib
+pymysql
