@@ -379,20 +379,26 @@ barmode = st.radio(
     index=0,
     key="barmode_selection"  # 선택 상태 기억
 )
-
 sort_option = st.radio(
     "X축 정렬 방식 선택",
     ("정렬 없음", "Y값 내림차순 (큰값 우선)", "Y값 오름차순 (작은값 우선)"),
     horizontal=True
 )
+shared_xaxes_option = st.radio(
+    "X축 공유 설정",
+    ("공유 (shared)", "개별 (not shared)"),
+    index=0
+)
+shared_xaxes = True if shared_xaxes_option == "공유 (shared)" else False
 
 if st.button('그래프 생성하기'):
     if len(metric) >= 1 and not df_group.empty:
         rows = len(metric)
         fig = make_subplots(
-            rows=rows, cols=1, shared_xaxes=True, vertical_spacing=0.1,
+            rows=rows, cols=1, shared_xaxes=shared_xaxes, vertical_spacing=0.1,
             subplot_titles=metric
         )
+        fig.update_xaxes(showticklabels=True)
 
         for i, m in enumerate(metric):
             df_to_plot = df_group.copy()
@@ -429,8 +435,6 @@ if st.button('그래프 생성하기'):
     else:
         st.warning("1개 이상의 지표를 선택하고, 필터링된 데이터가 있어야 시각화할 수 있습니다.")
 
-
- 
 # 히트맵 시각화 섹션
 st.subheader("피벗 테이블 히트맵")
 st.write("x축과 color기준(y축) 설정에서 2개 이상 선택 해주세요.")
