@@ -117,7 +117,7 @@ def preprocess_data(df, severity_df):
 
         "MISSING PERSON": "Other"
     }
-    df['pddistrict'] = df['category'].map(category_map)
+    df['l_category'] = df['category'].map(category_map)
 
     # # resolution Score 매핑
     # resolution_scores = {
@@ -172,7 +172,7 @@ if df.empty:
 st.subheader("📄 데이터 미리보기")
 st.dataframe(df, use_container_width=True)
 
-L_Category_list = df['pddistrict'].unique().tolist()
+L_Category_list = df['l_category'].unique().tolist()
 Category_list = df['category'].unique().tolist()
 PdDistrict_list = df['pddistrict'].unique().tolist()
 Year_list = df['year'].unique().tolist()
@@ -181,10 +181,10 @@ Day_list = df['day'].unique().tolist()
 Hour_list = df['hour'].unique().tolist()
 Weekday_list = df['dayofweek'].unique().tolist()
 
-# pddistrict 선택
-select_all_lcat = st.checkbox("전체 대분류(pddistrict) 선택")
+# l_category 선택
+select_all_lcat = st.checkbox("전체 대분류(l_category) 선택")
 selected_lcat = st.multiselect(
-    "대분류(pddistrict) 선택", L_Category_list,
+    "대분류(l_category) 선택", L_Category_list,
     default=L_Category_list if select_all_lcat else []
 )
 # category 선택
