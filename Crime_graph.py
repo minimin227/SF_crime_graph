@@ -296,8 +296,8 @@ filtered_df, selected_columns = filter_crime_data(
 #             Counts=('severity_score', 'count'),
 #             Severity_sum=('severity_score', 'sum'),
 #             Severity_mean=('severity_score', 'mean'),
-#             Resolution_sum=('resolutionscore', 'sum'),
-#             Resolution_mean=('resolutionscore', 'mean'),
+#             Resolution_sum=('resolution_score', 'sum'),
+#             Resolution_mean=('resolution_score', 'mean'),
 #             severity_per_resolution_sum=('severity_per_resolution', 'sum'),
 #             severity_per_resolution_mean=('severity_per_resolution', 'mean'),
 #         ).reset_index()
@@ -317,9 +317,9 @@ try:
             agg_dict.update({
                 'severity_score': ['sum', 'mean']
             })
-        if 'resolutionscore' in filtered_df.columns:
+        if 'resolution_score' in filtered_df.columns:
             agg_dict.update({
-                'resolutionscore': ['sum', 'mean']
+                'resolution_score': ['sum', 'mean']
             })
         if 'severity_per_resolution' in filtered_df.columns:
             agg_dict.update({
