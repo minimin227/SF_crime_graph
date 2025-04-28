@@ -58,7 +58,7 @@ def load_severity_mapping():
 @st.cache_data
 def preprocess_data(df, severity_df):
     # 필수 컬럼 확인
-    required_cols = ['Dates', 'Category', 'Descript', 'Resolution']
+    required_cols = ['Dates', 'Category', 'D_code', 'Resolution']
     if not all(col in df.columns for col in required_cols):
         return None  # 전처리 불가
 
@@ -128,7 +128,8 @@ def preprocess_data(df, severity_df):
 
     # Descript 정리 후 Severity 매핑
     # df['Descript'] = df['Descript'].str.strip().replace(r'\s+', ' ', regex=True)
-    df = df.merge(severity_df, on='Descript', how='left')
+    df = df.merge(severity_df, on='D_code', how='left')
+    df = df.drop(columns=['Descript'])
     df['Severity/Resolution'] = df['Severity_Score']/df['ResolutionScore']
     df = df.loc[:, ~df.columns.duplicated()]
 
