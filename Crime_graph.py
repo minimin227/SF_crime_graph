@@ -350,6 +350,7 @@ try:
                 'severity_per_resolution_sum': 'Severity_per_resolution_sum',
                 'severity_per_resolution_mean': 'Severity_per_resolution_mean'
             }
+            st.write("df_group columns:", df_group.columns.tolist())
             df_group = df_group.rename(columns=rename_mapping)
         else:
             st.warning("선택된 컬럼이 없어 그룹화할 수 없습니다.")
