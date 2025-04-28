@@ -380,6 +380,12 @@ barmode = st.radio(
     key="barmode_selection"  # 선택 상태 기억
 )
 
+sort_option = st.radio(
+    "X축 정렬 방식 선택",
+    ("정렬 없음", "Y값 내림차순 (큰값 우선)", "Y값 오름차순 (작은값 우선)"),
+    horizontal=True
+)
+
 if st.button('그래프 생성하기'):
     if len(metric) >= 1 and not df_group.empty:
         rows = len(metric)
@@ -389,16 +395,23 @@ if st.button('그래프 생성하기'):
         )
 
         for i, m in enumerate(metric):
+            df_to_plot = df_group.copy()
+
+            # --- 정렬 적용 ---
+            if sort_option != "정렬 없음":
+                ascending = True if sort_option == "Y값 오름차순 (작은값 우선)" else False
+                df_to_plot = df_to_plot.sort_values(by=m, ascending=ascending)
+
             if color_axis == '없음':
                 # 색상 기준 없음
                 fig.add_trace(
-                    go.Bar(x=df_group[x_axis], y=df_group[m], name=m),
+                    go.Bar(x=df_to_plot[x_axis], y=df_to_plot[m], name=m),
                     row=i+1, col=1
                 )
             else:
                 # 색상 기준 있음
-                for category in df_group[color_axis].dropna().unique():
-                    df_filtered = df_group[df_group[color_axis] == category]
+                for category in df_to_plot[color_axis].dropna().unique():
+                    df_filtered = df_to_plot[df_to_plot[color_axis] == category]
                     fig.add_trace(
                         go.Bar(
                             x=df_filtered[x_axis],
@@ -408,8 +421,8 @@ if st.button('그래프 생성하기'):
                         ),
                         row=i+1, col=1
                     )
-            fig.update_yaxes(title_text=m, row=i+1, col=1)
 
+            fig.update_yaxes(title_text=m, row=i+1, col=1)
 
         fig.update_layout(height=500 * rows, title_text=f"{x_axis} 기준 지표별 Subplot 비교", barmode=barmode)
         st.plotly_chart(fig)
