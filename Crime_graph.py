@@ -123,13 +123,13 @@ def preprocess_data(df, severity_df):
     #     'NONE': 1.0, 'UNFOUNDED': 5, 'EXCEPTIONAL CLEARANCE': 4.5, 'CLEARED-CONTACT JUVENILE FOR MORE INFO': 4.5
     #     , 'NOT PROSECUTED': 3.5, 'DISTRICT ATTORNEY REFUSES TO PROSECUTE': 3.5, 'PROSECUTED FOR LESSER OFFENSE': 4
     # }
-    # df['ResolutionScore'] = df['Resolution'].map(resolution_scores).fillna(5)
+    # df['Resolution'] = df['Resolution'].map(resolution_scores).fillna(5)
 
     # Descript 정리 후 Severity 매핑
     # df['Descript'] = df['Descript'].str.strip().replace(r'\s+', ' ', regex=True)
     # df = df.merge(severity_df, on='D_code', how='left')
     # df = df.drop(columns=['Descript'])
-    # df['Severity/Resolution'] = df['Severity_Score']/df['ResolutionScore']
+    # df['severity_per_resolution'] = df['Severity_Score']/df['Resolution']
     df = df.loc[:, ~df.columns.duplicated()]
 
     return df
@@ -139,7 +139,7 @@ st.title("🚔 San Francisco Crime 데이터 분석")
 
 # --- SQL 입력 창 ---
 st.sidebar.header("🔎 SQL 쿼리 입력")
-default_sql = "SELECT * FROM train WHERE dates BETWEEN '2015-01-01' AND '2015-05-14';"
+default_sql = "SELECT t.dates, t.category, t.dayofweek, t.pddistict, t.resolution, t.x, t.y, t.d_code, r.resolutionscore, d.severity_score, d.severity_score/r.resolutionscore AS severity_per_resolution FROM train t JOIN resolution_score r ON t.resolution=r.resolution JOIN descript_severity d ON t.d_code=d.d_code WHERE dates BETWEEN '2015-01-01' AND '2015-05-14';"
 user_sql = st.sidebar.text_area("SQL 입력:", default_sql, height=150)
 
 # --- 데이터 로드 및 캐싱 ---
@@ -285,33 +285,69 @@ filtered_df, selected_columns = filter_crime_data(
     selected_year, selected_month, selected_day, selected_hour
 )
 
+# try:
+#     if len(selected_columns) == 0:
+#         st.warning("선택된 필터가 없어 그룹화할 수 없습니다.")
+#         df_group = pd.DataFrame()
+#     else:
+#         df_group = filtered_df.groupby(selected_columns).agg(
+#             Counts=('severity_score', 'count'),
+#             Severity_sum=('severity_score', 'sum'),
+#             Severity_mean=('severity_score', 'mean'),
+#             Resolution_sum=('resolutionscore', 'sum'),
+#             Resolution_mean=('resolutionscore', 'mean'),
+#             severity_per_resolution_sum=('severity_per_resolution', 'sum'),
+#             severity_per_resolution_mean=('severity_per_resolution', 'mean'),
+#         ).reset_index()
+
+# except Exception as e:
+#     st.error(f"그룹화 중 오류 발생: {e}")
+#     df_group = pd.DataFrame()
+
 try:
     if len(selected_columns) == 0:
         st.warning("선택된 필터가 없어 그룹화할 수 없습니다.")
         df_group = pd.DataFrame()
     else:
-        df_group = filtered_df.groupby(selected_columns).agg(
-            Counts=('Severity_Score', 'count'),
-            Severity_sum=('Severity_Score', 'sum'),
-            Severity_mean=('Severity_Score', 'mean'),
-            ResolutionScore_sum=('ResolutionScore', 'sum'),
-            ResolutionScore_mean=('ResolutionScore', 'mean'),
-            Severity_Resolution_sum=('Severity/Resolution', 'sum'),
-            Severity_Resolution_mean=('Severity/Resolution', 'mean'),
-        ).reset_index()
+        # --- 동적 agg_dict 생성 ---
+        agg_dict = {}
+        if 'severity_score' in filtered_df.columns:
+            agg_dict.update({
+                'severity_score': ['count', 'sum', 'mean']
+            })
+        if 'resolutionrcore' in filtered_df.columns:
+            agg_dict.update({
+                'resolutionscore': ['sum', 'mean']
+            })
+        if 'severity_per_resolution' in filtered_df.columns:
+            agg_dict.update({
+                'severity_per_resolution': ['sum', 'mean']
+            })
 
+        if agg_dict:
+            # 그룹화
+            df_group = filtered_df.groupby(selected_columns).agg(agg_dict)
+
+            # 컬럼 다중인덱스(flatten)
+            df_group.columns = [
+                f"{col[0]}_{col[1]}" if col[1] != '' else col[0]
+                for col in df_group.columns
+            ]
+            df_group = df_group.reset_index()
+        else:
+            st.warning("선택된 컬럼이 없어 그룹화할 수 없습니다.")
+            df_group = pd.DataFrame()
 except Exception as e:
     st.error(f"그룹화 중 오류 발생: {e}")
     df_group = pd.DataFrame()
-
 
 # 시각화 설정 옵션 제공
 st.subheader("그래프 설정")
 st.write("위에서 선택된 필터에 따라 축과 색을 설정 해주세요.")
 columns_for_x_and_color = ['없음', 'L_Category', 'Category', 'PdDistrict', 'Year', 'Month', 'Day', 'Hour', 'DayOfWeek']
 metrics = ['Counts', 'Severity_sum', 'Severity_mean'
-        , 'ResolutionScore_sum', 'ResolutionScore_mean'
-        , 'Severity_Resolution_sum', 'Severity_Resolution_mean'
+        , 'Resolution_sum', 'Resolution_mean'
+        , 'severity_per_resolution_sum', 'severity_per_resolution_mean'
         ]
 graph_types = ['Bar']
 
