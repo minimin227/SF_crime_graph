@@ -64,10 +64,10 @@ def preprocess_data(df, severity_df):
 
     # dates 처리
     df['dates'] = pd.to_datetime(df['dates'])
-    df['Year'] = df['dates'].dt.year
-    df['Month'] = df['dates'].dt.month
-    df['Day'] = df['dates'].dt.day
-    df['Hour'] = df['dates'].dt.hour
+    df['year'] = df['dates'].dt.year
+    df['month'] = df['dates'].dt.month
+    df['day'] = df['dates'].dt.day
+    df['hour'] = df['dates'].dt.hour
 
     # 대분류 매핑
     category_map = {
@@ -117,7 +117,7 @@ def preprocess_data(df, severity_df):
 
         "MISSING PERSON": "Other"
     }
-    df['L_Category'] = df['category'].map(category_map)
+    df['pddistrict'] = df['category'].map(category_map)
 
     # # resolution Score 매핑
     # resolution_scores = {
@@ -172,19 +172,19 @@ if df.empty:
 st.subheader("📄 데이터 미리보기")
 st.dataframe(df, use_container_width=True)
 
-L_Category_list = df['L_Category'].unique().tolist()
+L_Category_list = df['pddistrict'].unique().tolist()
 Category_list = df['category'].unique().tolist()
-PdDistrict_list = df['PdDistrict'].unique().tolist()
-Year_list = df['Year'].unique().tolist()
-Month_list = df['Month'].unique().tolist()
-Day_list = df['Day'].unique().tolist()
-Hour_list = df['Hour'].unique().tolist()
-Weekday_list = df['DayOfWeek'].unique().tolist()
+PdDistrict_list = df['pddistrict'].unique().tolist()
+Year_list = df['year'].unique().tolist()
+Month_list = df['month'].unique().tolist()
+Day_list = df['day'].unique().tolist()
+Hour_list = df['hour'].unique().tolist()
+Weekday_list = df['dayofweek'].unique().tolist()
 
-# L_Category 선택
-select_all_lcat = st.checkbox("전체 대분류(L_Category) 선택")
+# pddistrict 선택
+select_all_lcat = st.checkbox("전체 대분류(pddistrict) 선택")
 selected_lcat = st.multiselect(
-    "대분류(L_Category) 선택", L_Category_list,
+    "대분류(pddistrict) 선택", L_Category_list,
     default=L_Category_list if select_all_lcat else []
 )
 # category 선택
@@ -194,33 +194,33 @@ selected_cat = st.multiselect(
     default=Category_list if select_all_cat else []
 )
 # 경찰서 관할구 선택
-select_all_pd = st.checkbox("전체 관할구(PdDistrict) 선택")
+select_all_pd = st.checkbox("전체 관할구(pddistrict) 선택")
 selected_pd = st.multiselect(
-    "관할구(PdDistrict) 선택", PdDistrict_list,
+    "관할구(pddistrict) 선택", PdDistrict_list,
     default=PdDistrict_list if select_all_pd else []
 )
 # 연도 선택
-select_all_year = st.checkbox("전체 연도(Year) 선택")
+select_all_year = st.checkbox("전체 연도(year) 선택")
 selected_year = st.multiselect(
-    "연도(Year) 선택", sorted(Year_list),
+    "연도(year) 선택", sorted(Year_list),
     default=Year_list if select_all_year else []
 )
 # 월 선택
-select_all_month = st.checkbox("전체 월(Month) 선택")
+select_all_month = st.checkbox("전체 월(month) 선택")
 selected_month = st.multiselect(
-    "월(Month) 선택", sorted(Month_list),
+    "월(month) 선택", sorted(Month_list),
     default=Month_list if select_all_month else []
 )
 # 일 선택
-select_all_day = st.checkbox("전체 일(Day) 선택")
+select_all_day = st.checkbox("전체 일(day) 선택")
 selected_day = st.multiselect(
-    "일(Day) 선택", sorted(Day_list),
+    "일(day) 선택", sorted(Day_list),
     default=Day_list if select_all_day else []
 )
 # 시간 선택
-select_all_hour = st.checkbox("전체 시간(Hour) 선택")
+select_all_hour = st.checkbox("전체 시간(hour) 선택")
 selected_hour = st.multiselect(
-    "시간(Hour) 선택", sorted(Hour_list),
+    "시간(hour) 선택", sorted(Hour_list),
     default=Hour_list if select_all_hour else []
 )
 # 요일 선택
@@ -235,12 +235,12 @@ selected_weekday = st.multiselect(
 def filter_crime_data(df, selected_lcat, selected_cat, selected_pd, selected_year,
                       selected_month, selected_day, selected_hour):
     filtered_df = df.copy()
-    selected_columns = ['L_Category', 'category', 'PdDistrict', 'Year', 'Month', 'Day', 'Hour', 'DayOfWeek']
+    selected_columns = ['pddistrict', 'category', 'pddistrict', 'year', 'month', 'day', 'hour', 'dayofweek']
 
     if selected_lcat:
-        filtered_df = filtered_df[filtered_df['L_Category'].isin(selected_lcat)]
+        filtered_df = filtered_df[filtered_df['pddistrict'].isin(selected_lcat)]
     else:
-        selected_columns.remove('L_Category')
+        selected_columns.remove('pddistrict')
 
     if selected_cat:
         filtered_df = filtered_df[filtered_df['category'].isin(selected_cat)]
@@ -248,34 +248,34 @@ def filter_crime_data(df, selected_lcat, selected_cat, selected_pd, selected_yea
         selected_columns.remove('category')
 
     if selected_pd:
-        filtered_df = filtered_df[filtered_df['PdDistrict'].isin(selected_pd)]
+        filtered_df = filtered_df[filtered_df['pddistrict'].isin(selected_pd)]
     else:
-        selected_columns.remove('PdDistrict')
+        selected_columns.remove('pddistrict')
 
     if selected_year:
-        filtered_df = filtered_df[filtered_df['Year'].isin(selected_year)]
+        filtered_df = filtered_df[filtered_df['year'].isin(selected_year)]
     else:
-        selected_columns.remove('Year')
+        selected_columns.remove('year')
 
     if selected_month:
-        filtered_df = filtered_df[filtered_df['Month'].isin(selected_month)]
+        filtered_df = filtered_df[filtered_df['month'].isin(selected_month)]
     else:
-        selected_columns.remove('Month')
+        selected_columns.remove('month')
 
     if selected_day:
-        filtered_df = filtered_df[filtered_df['Day'].isin(selected_day)]
+        filtered_df = filtered_df[filtered_df['day'].isin(selected_day)]
     else:
-        selected_columns.remove('Day')
+        selected_columns.remove('day')
 
     if selected_hour:
-        filtered_df = filtered_df[filtered_df['Hour'].isin(selected_hour)]
+        filtered_df = filtered_df[filtered_df['hour'].isin(selected_hour)]
     else:
-        selected_columns.remove('Hour')
+        selected_columns.remove('hour')
 
     if selected_weekday:
-        filtered_df = filtered_df[filtered_df['DayOfWeek'].isin(selected_weekday)]
+        filtered_df = filtered_df[filtered_df['dayofweek'].isin(selected_weekday)]
     else:
-        selected_columns.remove('DayOfWeek')
+        selected_columns.remove('dayofweek')
 
     return filtered_df, selected_columns
 
@@ -345,7 +345,7 @@ except Exception as e:
 # 시각화 설정 옵션 제공
 st.subheader("그래프 설정")
 st.write("위에서 선택된 필터에 따라 축과 색을 설정 해주세요.")
-columns_for_x_and_color = ['없음', 'L_Category', 'category', 'PdDistrict', 'Year', 'Month', 'Day', 'Hour', 'DayOfWeek']
+columns_for_x_and_color = ['없음', 'pddistrict', 'category', 'pddistrict', 'year', 'month', 'day', 'hour', 'dayofweek']
 metrics = ['Counts', 'Severity_sum', 'Severity_mean'
         , 'Resolution_sum', 'Resolution_mean'
         , 'severity_per_resolution_sum', 'severity_per_resolution_mean'
