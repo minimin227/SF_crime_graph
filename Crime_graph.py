@@ -650,22 +650,62 @@ if st.session_state['show_map']:
         st_folium(m, width=800, height=600)
 
     elif map_type == "Pydeck 지도":
-        ## --- 여기에 pydeck 코드 ---
+        weekday_mapping = {
+            'Monday': 0,
+            'Tuesday': 1,
+            'Wednesday': 2,
+            'Thursday': 3,
+            'Friday': 4,
+            'Saturday': 5,
+            'Sunday': 6
+        }
+        if animation_axis == 'dayofweek':
+            # 요일을 숫자로 변환
+            filtered_df['animation_value'] = filtered_df['dayofweek'].map(weekday_mapping)
+        else:
+            # year, month, hour은 그대로 사용
+            filtered_df['animation_value'] = filtered_df[animation_axis]
         if color_axis != '없음' and color_axis in filtered_df.columns:
             unique_values = filtered_df[color_axis].dropna().unique()
-            color_mapping = {val: [int(255*i/len(unique_values)), 100, 255-int(255*i/len(unique_values))] for i, val in enumerate(unique_values)}
+            cmap = cm.get_cmap('Set1', len(unique_values))  # 'plasma' 대신 원하는 colormap 가능
+            color_mapping = {val: [int(r*255), int(g*255), int(b*255)] 
+                            for val, (r, g, b, _) in zip(unique_values, cmap(np.linspace(0, 1, len(unique_values))))}
             filtered_df['color'] = filtered_df[color_axis].map(color_mapping)
         else:
             filtered_df['color'] = [[0, 0, 255] for _ in range(len(filtered_df))]
+        # --- 슬라이더로 애니메이션 값 선택 ---
+        min_val = int(filtered_df['animation_value'].min())
+        max_val = int(filtered_df['animation_value'].max())
+        selected_value = st.slider(
+            f"{animation_axis} 값 선택 (애니메이션 슬라이더)",
+            min_value=min_val,
+            max_value=max_val,
+            value=min_val,
+            step=1
+        )
+        filtered_df_anim = filtered_df[filtered_df['animation_value'] == selected_value]
+        if filtered_df_anim.empty:
+            st.warning(f"선택한 {animation_axis} = {selected_value} 에 해당하는 데이터가 없습니다.")
 
         layer = pdk.Layer(
             "ScatterplotLayer",
-            data=filtered_df,
+            data=filtered_df_anim,
             get_position='[x, y]',
-            get_color='color',
-            get_radius=30,
+            get_fill_color='color',
+            get_radius=10,
+            radius_min_pixels=2,
+            radius_max_pixels=10,
+            opacity=1,
+            filled=True,
+            stroked=True,
+            get_line_color=[0, 0, 0],  # 검은색 테두리
+            line_width_min_pixels=1,
             pickable=True,
-            auto_highlight=True
+            auto_highlight=True,
+            
+            # ✅ 애니메이션 설정
+            get_filter_value="animation_value",
+            filter_enabled=True,
         )
 
         view_state = pdk.ViewState(
@@ -704,17 +744,17 @@ if st.session_state['show_map']:
         selected_map_style = map_style_dict[map_style_option]
 
         r = pdk.Deck(
-            layers=[geojson_layer, layer],
+            layers=[geojson_layer, layer],  # 여러 레이어 추가 가능
             initial_view_state=view_state,
             map_style=selected_map_style,
-            tooltip={"text": "category: {category}\nresolution: {resolution}"}
+            tooltip={"text": "category: {category}\nresolution: {resolution}"},
         )
 
         st.pydeck_chart(r)
-       
+
         # 범례 추가
         if color_axis != '없음' and color_axis in filtered_df.columns:
-            st.markdown("### 🖌️ 색상 범례")
+            st.markdown("### 색상 범례")
             for val, color in color_mapping.items():
                 color_hex = "#{:02x}{:02x}{:02x}".format(color[0], color[1], color[2])
                 st.markdown(
@@ -723,5 +763,6 @@ if st.session_state['show_map']:
                     f"<span style='font-size:16px;'>{val}</span>"
                     f"</div>",
                     unsafe_allow_html=True
+                )
 else:
     st.info("지도가 숨겨져 있습니다.")
