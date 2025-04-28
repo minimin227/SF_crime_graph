@@ -118,18 +118,18 @@ def preprocess_data(df, severity_df):
     }
     df['L_Category'] = df['Category'].map(category_map)
 
-    # Resolution Score 매핑
-    resolution_scores = {
-        'NONE': 1.0, 'UNFOUNDED': 5, 'EXCEPTIONAL CLEARANCE': 4.5, 'CLEARED-CONTACT JUVENILE FOR MORE INFO': 4.5
-        , 'NOT PROSECUTED': 3.5, 'DISTRICT ATTORNEY REFUSES TO PROSECUTE': 3.5, 'PROSECUTED FOR LESSER OFFENSE': 4
-    }
-    df['ResolutionScore'] = df['Resolution'].map(resolution_scores).fillna(5)
+    # # Resolution Score 매핑
+    # resolution_scores = {
+    #     'NONE': 1.0, 'UNFOUNDED': 5, 'EXCEPTIONAL CLEARANCE': 4.5, 'CLEARED-CONTACT JUVENILE FOR MORE INFO': 4.5
+    #     , 'NOT PROSECUTED': 3.5, 'DISTRICT ATTORNEY REFUSES TO PROSECUTE': 3.5, 'PROSECUTED FOR LESSER OFFENSE': 4
+    # }
+    # df['ResolutionScore'] = df['Resolution'].map(resolution_scores).fillna(5)
 
     # Descript 정리 후 Severity 매핑
     # df['Descript'] = df['Descript'].str.strip().replace(r'\s+', ' ', regex=True)
-    df = df.merge(severity_df, on='D_code', how='left')
-    df = df.drop(columns=['Descript'])
-    df['Severity/Resolution'] = df['Severity_Score']/df['ResolutionScore']
+    # df = df.merge(severity_df, on='D_code', how='left')
+    # df = df.drop(columns=['Descript'])
+    # df['Severity/Resolution'] = df['Severity_Score']/df['ResolutionScore']
     df = df.loc[:, ~df.columns.duplicated()]
 
     return df
