@@ -462,7 +462,7 @@ if st.button('히트맵 생성하기'):
             else:
                 sorted_cols = pivot_df.sum(axis=0).sort_values(ascending=True).index
             pivot_df = pivot_df[sorted_cols]  
-
+        
             fig_heatmap = px.imshow(
                 pivot_df,
                 text_auto=True,
@@ -497,6 +497,13 @@ if st.button('히트맵 생성하기'):
                 axis=1
             )
 
+            # 정렬하기 (pivot_df의 columns 기준)
+            if sort_option == "총합 큰 순":
+                sorted_cols = normalized_pivot_df.sum(axis=0).sort_values(ascending=False).index
+            else:
+                sorted_cols = normalized_pivot_df.sum(axis=0).sort_values(ascending=True).index
+            normalized_pivot_df = normalized_pivot_df[sorted_cols]  
+
             fig_heatmap = px.imshow(
                 normalized_pivot_df,
                 text_auto=True,
@@ -528,7 +535,8 @@ if st.button('히트맵 생성하기'):
                 lambda x: (x - np.nanmin(x)) / (np.nanmax(x) - np.nanmin(x)) if np.nanmax(x) != np.nanmin(x) else 0,
                 axis=0
             )
-
+            normalized_pivot_df = normalized_pivot_df[sorted_cols]
+            
             fig_heatmap = px.imshow(
                 normalized_pivot_df,
                 text_auto=True,
