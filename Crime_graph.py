@@ -558,8 +558,8 @@ if st.button("지도 보기 / 숨기기"):
 # 현재 상태에 따라 지도 표시
 if st.session_state['show_map']:
     if not filtered_df.empty:
-        center_lat = filtered_df['Y'].mean()
-        center_lon = filtered_df['X'].mean()
+        center_lat = filtered_df['y'].mean()
+        center_lon = filtered_df['x'].mean()
     else:
         center_lat, center_lon = 37.77, -122.42
 
@@ -579,7 +579,7 @@ if st.session_state['show_map']:
             tooltip=folium.GeoJsonTooltip(fields=["district"], aliases=["district:"])
         ).add_to(m)
 
-        heat_data = [[row['Y'], row['X']] for idx, row in filtered_df.iterrows() if pd.notnull(row['Y']) and pd.notnull(row['X'])]
+        heat_data = [[row['y'], row['x']] for idx, row in filtered_df.iterrows() if pd.notnull(row['y']) and pd.notnull(row['x'])]
         heatmap = HeatMap(heat_data, radius=8, blur=15, min_opacity=0.4)
 
         if color_axis != '없음' and color_axis in filtered_df.columns:
@@ -591,12 +591,12 @@ if st.session_state['show_map']:
 
         marker_cluster = MarkerCluster(name="MarkerCluster")
         for idx, row in filtered_df.iterrows():
-            if pd.notnull(row['Y']) and pd.notnull(row['X']):
+            if pd.notnull(row['y']) and pd.notnull(row['x']):
                 popup_text = f"category: {row['category']}<br>resolution: {row['resolution']}"
                 color = color_mapping.get(row[color_axis], 'blue') if color_axis != '없음' else 'blue'
 
                 folium.CircleMarker(
-                    location=[row['Y'], row['X']],
+                    location=[row['y'], row['x']],
                     radius=3,
                     color=color,
                     fill=True,
@@ -625,7 +625,7 @@ if st.session_state['show_map']:
         layer = pdk.Layer(
             "ScatterplotLayer",
             data=filtered_df,
-            get_position='[X, Y]',
+            get_position='[x, y]',
             get_color='color',
             get_radius=30,
             pickable=True,
