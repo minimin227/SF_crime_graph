@@ -38,6 +38,7 @@ def load_sql_data(sql):
         conn = pymysql.connect(**DB_CONFIG)
         df = pd.read_sql(sql, conn)
         conn.close()
+        df.columns = [col.lower() for col in df.columns]
         return df
     except Exception as e:
         st.error(f"❌ SQL 실행 오류: {e}")
@@ -57,7 +58,7 @@ def load_severity_mapping():
 @st.cache_data
 def preprocess_data(df, severity_df):
     # 필수 컬럼 확인
-    required_cols = ['dates', 'Category', 'dates', 'resolution']
+    required_cols = ['dates', 'category', 'dates', 'resolution']
     if not all(col in df.columns for col in required_cols):
         return None  # 전처리 불가
 
@@ -116,7 +117,7 @@ def preprocess_data(df, severity_df):
 
         "MISSING PERSON": "Other"
     }
-    df['L_Category'] = df['Category'].map(category_map)
+    df['L_Category'] = df['category'].map(category_map)
 
     # # resolution Score 매핑
     # resolution_scores = {
@@ -172,7 +173,7 @@ st.subheader("📄 데이터 미리보기")
 st.dataframe(df, use_container_width=True)
 
 L_Category_list = df['L_Category'].unique().tolist()
-Category_list = df['Category'].unique().tolist()
+Category_list = df['category'].unique().tolist()
 PdDistrict_list = df['PdDistrict'].unique().tolist()
 Year_list = df['Year'].unique().tolist()
 Month_list = df['Month'].unique().tolist()
@@ -186,10 +187,10 @@ selected_lcat = st.multiselect(
     "대분류(L_Category) 선택", L_Category_list,
     default=L_Category_list if select_all_lcat else []
 )
-# Category 선택
-select_all_cat = st.checkbox("전체 범죄유형(Category) 선택")
+# category 선택
+select_all_cat = st.checkbox("전체 범죄유형(category) 선택")
 selected_cat = st.multiselect(
-    "범죄유형(Category) 선택", Category_list,
+    "범죄유형(category) 선택", Category_list,
     default=Category_list if select_all_cat else []
 )
 # 경찰서 관할구 선택
@@ -234,7 +235,7 @@ selected_weekday = st.multiselect(
 def filter_crime_data(df, selected_lcat, selected_cat, selected_pd, selected_year,
                       selected_month, selected_day, selected_hour):
     filtered_df = df.copy()
-    selected_columns = ['L_Category', 'Category', 'PdDistrict', 'Year', 'Month', 'Day', 'Hour', 'DayOfWeek']
+    selected_columns = ['L_Category', 'category', 'PdDistrict', 'Year', 'Month', 'Day', 'Hour', 'DayOfWeek']
 
     if selected_lcat:
         filtered_df = filtered_df[filtered_df['L_Category'].isin(selected_lcat)]
@@ -242,9 +243,9 @@ def filter_crime_data(df, selected_lcat, selected_cat, selected_pd, selected_yea
         selected_columns.remove('L_Category')
 
     if selected_cat:
-        filtered_df = filtered_df[filtered_df['Category'].isin(selected_cat)]
+        filtered_df = filtered_df[filtered_df['category'].isin(selected_cat)]
     else:
-        selected_columns.remove('Category')
+        selected_columns.remove('category')
 
     if selected_pd:
         filtered_df = filtered_df[filtered_df['PdDistrict'].isin(selected_pd)]
@@ -344,7 +345,7 @@ except Exception as e:
 # 시각화 설정 옵션 제공
 st.subheader("그래프 설정")
 st.write("위에서 선택된 필터에 따라 축과 색을 설정 해주세요.")
-columns_for_x_and_color = ['없음', 'L_Category', 'Category', 'PdDistrict', 'Year', 'Month', 'Day', 'Hour', 'DayOfWeek']
+columns_for_x_and_color = ['없음', 'L_Category', 'category', 'PdDistrict', 'Year', 'Month', 'Day', 'Hour', 'DayOfWeek']
 metrics = ['Counts', 'Severity_sum', 'Severity_mean'
         , 'Resolution_sum', 'Resolution_mean'
         , 'severity_per_resolution_sum', 'severity_per_resolution_mean'
@@ -381,13 +382,13 @@ if st.button('그래프 생성하기'):
                 )
             else:
                 # 색상 기준 있음
-                for Category in df_group[color_axis].dropna().unique():
-                    df_filtered = df_group[df_group[color_axis] == Category]
+                for category in df_group[color_axis].dropna().unique():
+                    df_filtered = df_group[df_group[color_axis] == category]
                     fig.add_trace(
                         go.Bar(
                             x=df_filtered[x_axis],
                             y=df_filtered[m],
-                            name=str(Category),
+                            name=str(category),
                             showlegend=(i == 0)  # 첫 row에만 범례 표시
                         ),
                         row=i+1, col=1
@@ -576,7 +577,7 @@ if st.session_state['show_map']:
         marker_cluster = MarkerCluster(name="MarkerCluster")
         for idx, row in filtered_df.iterrows():
             if pd.notnull(row['Y']) and pd.notnull(row['X']):
-                popup_text = f"Category: {row['Category']}<br>resolution: {row['resolution']}"
+                popup_text = f"category: {row['category']}<br>resolution: {row['resolution']}"
                 color = color_mapping.get(row[color_axis], 'blue') if color_axis != '없음' else 'blue'
 
                 folium.CircleMarker(
@@ -655,7 +656,7 @@ if st.session_state['show_map']:
             layers=[geojson_layer, layer],
             initial_view_state=view_state,
             map_style=selected_map_style,
-            tooltip={"text": "Category: {Category}\nresolution: {resolution}"}
+            tooltip={"text": "category: {category}\nresolution: {resolution}"}
         )
 
         st.pydeck_chart(r)
