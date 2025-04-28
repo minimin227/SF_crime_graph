@@ -711,6 +711,17 @@ if st.session_state['show_map']:
         )
 
         st.pydeck_chart(r)
-
+       
+        # 범례 추가
+        if color_axis != '없음' and color_axis in filtered_df.columns:
+            st.markdown("### 🖌️ 색상 범례")
+            for val, color in color_mapping.items():
+                color_hex = "#{:02x}{:02x}{:02x}".format(color[0], color[1], color[2])
+                st.markdown(
+                    f"<div style='display:flex; align-items:center;'>"
+                    f"<div style='width:20px; height:20px; background:{color_hex}; margin-right:10px;'></div>"
+                    f"<span style='font-size:16px;'>{val}</span>"
+                    f"</div>",
+                    unsafe_allow_html=True
 else:
     st.info("지도가 숨겨져 있습니다.")
