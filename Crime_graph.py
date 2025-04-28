@@ -576,7 +576,7 @@ if st.session_state['show_map']:
                 'fillColor': 'lightgray', # 내부 채우는 색
                 'fillOpacity': 0.1       # 내부 채우기 투명도
             },
-            tooltip=folium.GeoJsonTooltip(fields=["district"], aliases=["District:"])
+            tooltip=folium.GeoJsonTooltip(fields=["district"], aliases=["district:"])
         ).add_to(m)
 
         heat_data = [[row['Y'], row['X']] for idx, row in filtered_df.iterrows() if pd.notnull(row['Y']) and pd.notnull(row['X'])]
