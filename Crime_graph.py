@@ -140,6 +140,7 @@ st.title("🚔 San Francisco Crime 데이터 분석")
 
 # --- SQL 입력 창 ---
 st.sidebar.header("🔎 SQL 쿼리 입력")
+st.sidebar.write("SELECT t.*\n, r.resolution_score\n, d.severity_score\n, d.severity_score/r.resolution_score AS severity_per_resolution \nFROM train t \nJOIN resolution_score r \nON t.resolution=r.resolution \nJOIN descript_severity d \nON t.d_code=d.d_code \nWHERE dates BETWEEN '2015-01-01' AND '2015-05-14';")
 default_sql = "SELECT t.*\n, r.resolution_score\n, d.severity_score\n, d.severity_score/r.resolution_score AS severity_per_resolution \nFROM train t \nJOIN resolution_score r \nON t.resolution=r.resolution \nJOIN descript_severity d \nON t.d_code=d.d_code \nWHERE dates BETWEEN '2015-01-01' AND '2015-05-14';"
 user_sql = st.sidebar.text_area("SQL 입력:", default_sql, height=150)
 
