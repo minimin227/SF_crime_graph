@@ -235,12 +235,12 @@ selected_weekday = st.multiselect(
 def filter_crime_data(df, selected_lcat, selected_cat, selected_pd, selected_year,
                       selected_month, selected_day, selected_hour):
     filtered_df = df.copy()
-    selected_columns = ['pddistrict', 'category', 'pddistrict', 'year', 'month', 'day', 'hour', 'dayofweek']
+    selected_columns = ['l_category', 'category', 'pddistrict', 'year', 'month', 'day', 'hour', 'dayofweek']
 
     if selected_lcat:
-        filtered_df = filtered_df[filtered_df['pddistrict'].isin(selected_lcat)]
+        filtered_df = filtered_df[filtered_df['l_category'].isin(selected_lcat)]
     else:
-        selected_columns.remove('pddistrict')
+        selected_columns.remove('l_category')
 
     if selected_cat:
         filtered_df = filtered_df[filtered_df['category'].isin(selected_cat)]
@@ -345,7 +345,7 @@ except Exception as e:
 # 시각화 설정 옵션 제공
 st.subheader("그래프 설정")
 st.write("위에서 선택된 필터에 따라 축과 색을 설정 해주세요.")
-columns_for_x_and_color = ['없음', 'pddistrict', 'category', 'pddistrict', 'year', 'month', 'day', 'hour', 'dayofweek']
+columns_for_x_and_color = ['없음', 'l_category', 'category', 'pddistrict', 'year', 'month', 'day', 'hour', 'dayofweek']
 metrics = ['Counts', 'Severity_sum', 'Severity_mean'
         , 'Resolution_sum', 'Resolution_mean'
         , 'severity_per_resolution_sum', 'severity_per_resolution_mean'
