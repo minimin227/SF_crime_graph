@@ -349,7 +349,7 @@ try:
                 'severity_per_resolution_sum': 'Severity_per_resolution_sum',
                 'severity_per_resolution_mean': 'Severity_per_resolution_mean'
             }
-            df_group.rename(columns=rename_mapping, inplace=True)
+            df_group = df_group.rename(columns=rename_mapping)
         else:
             st.warning("선택된 컬럼이 없어 그룹화할 수 없습니다.")
             df_group = pd.DataFrame()
