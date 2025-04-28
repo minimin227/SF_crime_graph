@@ -58,7 +58,7 @@ def load_severity_mapping():
 @st.cache_data
 def preprocess_data(df, severity_df):
     # 필수 컬럼 확인
-    required_cols = ['dates', 'category', 'dates', 'resolution']
+    required_cols = ['dates', 'category', 'resolution']
     if not all(col in df.columns for col in required_cols):
         return None  # 전처리 불가
 
@@ -315,9 +315,9 @@ try:
         agg_dict = {}
         if 'severity_score' in filtered_df.columns:
             agg_dict.update({
-                'severity_score': ['count', 'sum', 'mean']
+                'severity_score': ['sum', 'mean']
             })
-        if 'resolutionrcore' in filtered_df.columns:
+        if 'resolutionscore' in filtered_df.columns:
             agg_dict.update({
                 'resolutionscore': ['sum', 'mean']
             })
@@ -325,7 +325,10 @@ try:
             agg_dict.update({
                 'severity_per_resolution': ['sum', 'mean']
             })
-
+        if 'dates' in filtered_df.columns:
+            agg_dict.update({
+                'dates': ['count']
+            })
         if agg_dict:
             # 그룹화
             df_group = filtered_df.groupby(selected_columns).agg(agg_dict)
@@ -336,6 +339,17 @@ try:
                 for col in df_group.columns
             ]
             df_group = df_group.reset_index()
+
+            rename_mapping = {
+                'dates_count': 'Counts',
+                'severity_score_sum': 'Severity_sum',
+                'severity_score_mean': 'Severity_mean',
+                'resolutionscore_sum': 'Resolution_sum',
+                'resolutionscore_mean': 'Resolution_mean',
+                'severity_per_resolution_sum': 'Severity_per_resolution_sum',
+                'severity_per_resolution_mean': 'Severity_per_resolution_mean'
+            }
+            df_group.rename(columns=rename_mapping, inplace=True)
         else:
             st.warning("선택된 컬럼이 없어 그룹화할 수 없습니다.")
             df_group = pd.DataFrame()
@@ -347,10 +361,10 @@ except Exception as e:
 st.subheader("그래프 설정")
 st.write("위에서 선택된 필터에 따라 축과 색을 설정 해주세요.")
 columns_for_x_and_color = ['없음', 'l_category', 'category', 'pddistrict', 'year', 'month', 'day', 'hour', 'dayofweek']
-metrics = ['Counts', 'Severity_sum', 'Severity_mean'
-        , 'Resolution_sum', 'Resolution_mean'
-        , 'severity_per_resolution_sum', 'severity_per_resolution_mean'
-        ]
+metrics = ['Counts', 'Severity_sum', 'Severity_mean',
+           'Resolution_sum', 'Resolution_mean',
+           'Severity_per_resolution_sum', 'Severity_per_resolution_mean']
+
 graph_types = ['Bar']
 
 # 사용자 선택 입력
