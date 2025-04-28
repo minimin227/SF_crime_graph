@@ -343,8 +343,8 @@ try:
                 'dates_count': 'Counts',
                 'severity_score_sum': 'Severity_sum',
                 'severity_score_mean': 'Severity_mean',
-                'resolutionscore_sum': 'Resolution_sum',
-                'resolutionscore_mean': 'Resolution_mean',
+                'resolution_score_sum': 'Resolution_sum',
+                'resolution_score_mean': 'Resolution_mean',
                 'severity_per_resolution_sum': 'Severity_per_resolution_sum',
                 'severity_per_resolution_mean': 'Severity_per_resolution_mean'
             }
