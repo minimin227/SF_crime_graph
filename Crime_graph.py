@@ -439,13 +439,12 @@ if st.button('그래프 생성하기'):
 st.subheader("피벗 테이블 히트맵")
 st.write("x축과 color기준(y축) 설정에서 2개 이상 선택 해주세요.")
 st.write("그래프를 표시할 값을 하나만 선택해주세요.")
-if st.button('히트맵 생성하기'):
-    sort_option = st.radio(
+sort_option = st.radio(
         "X축 정렬 기준 (합계)",
         ("총합 큰 순", "총합 작은 순"),
         index=0
     )
-
+if st.button('히트맵 생성하기'):
     if x_axis != '없음' and color_axis != '없음' and len(metric) == 1:
         pivot_metric = metric[0]
 
