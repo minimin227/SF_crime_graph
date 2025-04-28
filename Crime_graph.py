@@ -339,6 +339,7 @@ try:
                 for col in df_group.columns
             ]
             df_group = df_group.reset_index()
+            st.write("df_group columns:", df_group.columns.tolist())
 
             rename_mapping = {
                 'dates_count': 'Counts',
