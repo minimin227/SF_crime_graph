@@ -31,7 +31,6 @@ DB_CONFIG = {
     "charset": "utf8mb4"
 }
 
-
 # --- 데이터 로딩 함수 ---
 @st.cache_data
 def load_sql_data(sql):
@@ -380,7 +379,7 @@ if st.button('히트맵 생성하기'):
                 index=color_axis,
                 columns=x_axis,
                 values=pivot_metric,
-                aggfunc='mean'
+                aggfunc='sum'
             )
 
             fig_heatmap = px.imshow(
@@ -407,7 +406,7 @@ if st.button('히트맵 생성하기'):
                 index=color_axis,
                 columns=x_axis,
                 values=pivot_metric,
-                aggfunc='mean'
+                aggfunc='sum'
             )
 
             # 행(row)별 정규화 (각 row를 0~1 범위로)
@@ -439,7 +438,7 @@ if st.button('히트맵 생성하기'):
                 index=color_axis,
                 columns=x_axis,
                 values=pivot_metric,
-                aggfunc='mean'
+                aggfunc='sum'
             )
 
             # 행(row)별 정규화 (각 row를 0~1 범위로)
