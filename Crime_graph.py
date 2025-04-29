@@ -687,26 +687,36 @@ if st.session_state['show_map']:
         if filtered_df_anim.empty:
             st.warning(f"선택한 {animation_axis} = {selected_value} 에 해당하는 데이터가 없습니다.")
 
-        layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=filtered_df_anim,
-            get_position='[x, y]',
-            get_fill_color='color',
-            get_radius=10,
-            radius_min_pixels=2,
-            radius_max_pixels=10,
-            opacity=1,
-            filled=True,
-            stroked=True,
-            get_line_color=[0, 0, 0],  # 검은색 테두리
-            line_width_min_pixels=1,
-            pickable=True,
-            auto_highlight=True,
-            
-            # ✅ 애니메이션 설정
-            get_filter_value="animation_value",
-            filter_enabled=True,
-        )
+        if layer_type == "ScatterplotLayer":
+            layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=filtered_df_anim,
+                get_position='[x, y]',
+                get_fill_color='color',
+                get_radius=10,
+                radius_min_pixels=2,
+                radius_max_pixels=10,
+                opacity=1,
+                filled=True,
+                stroked=True,
+                get_line_color=[0, 0, 0],
+                line_width_min_pixels=1,
+                pickable=True,
+                auto_highlight=True,
+            )
+        elif layer_type == "HexagonLayer":
+            layer = pdk.Layer(
+                "HexagonLayer",
+                data=filtered_df_anim,
+                get_position='[x, y]',
+                radius=100,
+                elevation_scale=50,
+                elevation_range=[0, 1000],
+                extruded=True,
+                coverage=1,
+                pickable=True,
+                auto_highlight=True,
+            )
 
         view_state = pdk.ViewState(
             latitude=center_lat,
